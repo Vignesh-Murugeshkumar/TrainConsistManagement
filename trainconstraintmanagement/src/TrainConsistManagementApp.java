@@ -25,7 +25,7 @@ public class TrainConsistManagementApp {
         System.out.println("\nUC2 operations completed successfully ...");
 
         System.out.println("\n======================================");
-        System.out.println(" UC4 - Manage Bogie Order using LinkedList ");
+        System.out.println(" UC4 - Manage Bogie Order using LinkedList");
         System.out.println("======================================\n");
         LinkedList<String> bogieOrder = new LinkedList<>();
         bogieOrder.add("General");
