@@ -1,9 +1,11 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class TrainConsistManagementApp {
-
     public static void main(String[] args) {
+        // --- UC2 Logic ---
         System.out.println("======================================");
         System.out.println(" UC2 - Add Passenger Bogies to Train ");
         System.out.println("======================================\n");
@@ -11,16 +13,14 @@ public class TrainConsistManagementApp {
         passengerBogies.add("Sleeper");
         passengerBogies.add("AC Chair");
         passengerBogies.add("First Class");
-        System.out.println("After Adding Bogies:");
-        System.out.println("Passenger Bogies : " + passengerBogies + "\n");
-        passengerBogies.remove("AC Chair");
-        System.out.println("After Removing 'AC Chair':");
-        System.out.println("Passenger Bogies : " + passengerBogies + "\n");
-        boolean exists = passengerBogies.contains("Sleeper");
-        System.out.println("Checking if 'Sleeper' exists:");
-        System.out.println("Contains Sleeper? : " + exists + "\n");
-        System.out.println("Final Train Passenger Consist:");
-        System.out.println(passengerBogies);
-        System.out.println("\nUC2 operations completed successfully ...");
+        // ... (remaining UC2 print statements)
+
+        // --- UC3 Logic ---
+        System.out.println("\n ======================================= ");
+        System.out.println(" UC3 - Track Unique Bogie IDs ");
+        System.out.println(" ======================================= \n");
+        Set<String> bogies = new HashSet<>();
+        bogies.add("BG101");
+        // ... (remaining UC3 print statements)
     }
 }
