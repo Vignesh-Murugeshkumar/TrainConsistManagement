@@ -3,12 +3,12 @@ import java.util.stream.Collectors;
 
 public class TrainConsistManagementApp {
 
-    // Reusing Bogie model from UC7 / UC8
-    static class Bogie {
-        String name;
-        int capacity;
+    // Declare as public so the test class can see it
+    public static class Bogie {
+        public String name;
+        public int capacity;
 
-        Bogie(String name, int capacity) {
+        public Bogie(String name, int capacity) {
             this.name = name;
             this.capacity = capacity;
         }
@@ -19,7 +19,6 @@ public class TrainConsistManagementApp {
         System.out.println(" UC9 - Group Bogies by Type ");
         System.out.println("==================================");
 
-        // Create list of bogies
         List<Bogie> bogies = new ArrayList<>();
         bogies.add(new Bogie("Sleeper", 72));
         bogies.add(new Bogie("AC Chair", 56));
@@ -27,24 +26,20 @@ public class TrainConsistManagementApp {
         bogies.add(new Bogie("Sleeper", 70));
         bogies.add(new Bogie("AC Chair", 60));
 
-        // Display input bogies
-        System.out.println("\nAll Bogies:");
-        for (Bogie b : bogies) {
-            System.out.println(b.name + " -> " + b.capacity);
-        }
-
-        // Group using Collectors.groupingBy
-        extracted(bogies);
+        // Group using the functional method
+        Map<String, List<Bogie>> grouped = getGroupedBogies(bogies);
+        displayGroupedBogies(grouped);
 
         System.out.println("\nUC9 grouping completed ...");
     }
 
-    public static void extracted(List<Bogie> bogies) {
-        Map<String, List<Bogie>> groupedBogies =
-                bogies.stream()
-                        .collect(Collectors.groupingBy(b -> b.name));
+    // Returning the Map makes this logic testable
+    public static Map<String, List<Bogie>> getGroupedBogies(List<Bogie> bogies) {
+        return bogies.stream()
+                .collect(Collectors.groupingBy(b -> b.name));
+    }
 
-        // Display grouped structure
+    public static void displayGroupedBogies(Map<String, List<Bogie>> groupedBogies) {
         System.out.println("\nGrouped Bogies:");
         for (Map.Entry<String, List<Bogie>> entry : groupedBogies.entrySet()) {
             System.out.println("\nBogie Type: " + entry.getKey());
