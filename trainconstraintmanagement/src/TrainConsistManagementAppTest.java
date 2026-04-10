@@ -1,150 +1,91 @@
 import org.junit.jupiter.api.Test;
 import java.util.*;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import java.util.*;
-import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 
-class TrainConsistManagementAppTest {
+public class TrainConsistManagementAppTest {
 
-    static class Bogie {
-        String name;
-        int capacity;
-    @Test
-    void testGroupedBogies_CorrectKeysAndCounts() {
-        // Arrange
-        List<TrainConsistManagementApp.Bogie> testBogies = Arrays.asList(
-                new TrainConsistManagementApp.Bogie("Sleeper", 72),
-                new TrainConsistManagementApp.Bogie("AC Chair", 56),
-                new TrainConsistManagementApp.Bogie("Sleeper", 70)
-        );
+    static class GoodsBogie {
+        String type;
+        String cargo;
 
-        // Act - Use the public static method from the App class
-        Map<String, List<TrainConsistManagementApp.Bogie>> result =
-                TrainConsistManagementApp.getGroupedBogies(testBogies);
-
-        // Assert
-        assertEquals(2, result.size(), "Should have 2 unique groups");
-        assertEquals(2, result.get("Sleeper").size(), "Sleeper group count mismatch");
-        assertEquals(1, result.get("AC Chair").size());
-    private List<TrainConsistManagementApp.Bogie> bogies;
-
-        Bogie(String name, int capacity) {
-            this.name = name;
-            this.capacity = capacity;
+        GoodsBogie(String type, String cargo) {
+            this.type = type;
+            this.cargo = cargo;
         }
     }
 
+    // Safety rule: Cylindrical bogies must carry only Petroleum
+    private boolean isTrainFormationSafe(List<GoodsBogie> bogies) {
+        return bogies.stream()
+                .allMatch(b -> !(b.type.equals("Cylindrical") && !b.cargo.equals("Petroleum")));
+    }
+
     @Test
-    void testStreamAggregationBehavior() {
-        List<Bogie> bogies = Arrays.asList(
-                new Bogie("Sleeper", 72),
-                new Bogie("AC Chair", 56),
-                new Bogie("First Class", 24),
-                new Bogie("Sleeper", 70)
+    void testStreamSafetyValidationBehavior() {
+        List<GoodsBogie> bogies = Arrays.asList(
+                new GoodsBogie("Cylindrical", "Petroleum"),
+                new GoodsBogie("Open", "Coal"),
+                new GoodsBogie("Box", "Grain"),
+                new GoodsBogie("Cylindrical", "Coal") // violates rule
         );
 
-        int totalCapacity = bogies.stream()
-                .map(b -> b.capacity)
-                .reduce(0, Integer::sum);
-
-        assertEquals(222, totalCapacity);
+        boolean result = isTrainFormationSafe(bogies);
+        assertFalse(result);
     }
 
     @Test
-    void testCapacityExtractionUsingMap() {
-        List<Bogie> bogies = Arrays.asList(new Bogie("Sleeper", 72));
-        List<Integer> capacities = bogies.stream()
-                .map(b -> b.capacity)
-                .collect(Collectors.toList());
-
-        assertEquals(Collections.singletonList(72), capacities);
-    }
-
-    @Test
-    void testTotalSeatCalculation() {
-        List<Bogie> bogies = Arrays.asList(
-                new Bogie("AC Chair", 56),
-                new Bogie("Sleeper", 70)
+    void testCylindricalBogieCargoRule() {
+        List<GoodsBogie> bogies = Arrays.asList(
+                new GoodsBogie("Cylindrical", "Petroleum"),
+                new GoodsBogie("Cylindrical", "Petroleum")
         );
 
-        int total = bogies.stream()
-                .map(b -> b.capacity)
-                .reduce(0, Integer::sum);
+        assertTrue(isTrainFormationSafe(bogies));
 
-        assertEquals(126, total);
-    }
-
-    @Test
-    void testMultipleBogieAggregation() {
-        List<Bogie> bogies = Arrays.asList(
-                new Bogie("Sleeper", 72),
-                new Bogie("Sleeper", 70),
-                new Bogie("AC Chair", 56)
+        bogies = Arrays.asList(
+                new GoodsBogie("Cylindrical", "Petroleum"),
+                new GoodsBogie("Cylindrical", "Grain") // invalid
         );
 
-        int total = bogies.stream()
-                .map(b -> b.capacity)
-                .reduce(0, Integer::sum);
-
-        assertEquals(198, total);
+        assertFalse(isTrainFormationSafe(bogies));
     }
 
     @Test
-    void testSingleBogieHandling() {
-        List<Bogie> bogies = Arrays.asList(new Bogie("First Class", 24));
-
-        int total = bogies.stream()
-                .map(b -> b.capacity)
-                .reduce(0, Integer::sum);
-
-        assertEquals(24, total);
-    }
-
-    @Test
-    void testEmptyCollectionHandling() {
-        List<Bogie> bogies = new ArrayList<>();
-
-        int total = bogies.stream()
-                .map(b -> b.capacity)
-                .reduce(0, Integer::sum);
-
-        assertEquals(0, total);
-    }
-
-    @Test
-    void testOriginalCollectionIntegrity() {
-        List<Bogie> bogies = Arrays.asList(
-                new Bogie("Sleeper", 72),
-                new Bogie("AC Chair", 56)
+    void testValidTrainFormation() {
+        List<GoodsBogie> bogies = Arrays.asList(
+                new GoodsBogie("Open", "Coal"),
+                new GoodsBogie("Box", "Grain"),
+                new GoodsBogie("Flat", "Machinery")
         );
 
-        List<Bogie> copy = new ArrayList<>(bogies);
-
-        bogies.stream()
-                .map(b -> b.capacity)
-                .reduce(0, Integer::sum);
-
-        assertEquals(copy.size(), bogies.size());
-        assertEquals(copy.get(0).name, bogies.get(0).name);
-        assertEquals(copy.get(1).capacity, bogies.get(1).capacity);
+        assertTrue(isTrainFormationSafe(bogies));
     }
 
     @Test
-    void testNumericAggregationValidation() {
-        List<Bogie> bogies = Arrays.asList(
-                new Bogie("Sleeper", 72),
-                new Bogie("AC Chair", 56),
-                new Bogie("First Class", 24),
-                new Bogie("Sleeper", 70)
+    void testEmptyTrainFormationIsSafe() {
+        List<GoodsBogie> bogies = new ArrayList<>();
+        assertTrue(isTrainFormationSafe(bogies));
+    }
+
+    @Test
+    void testMixedBogiesWithValidCylindricalCargo() {
+        List<GoodsBogie> bogies = Arrays.asList(
+                new GoodsBogie("Cylindrical", "Petroleum"),
+                new GoodsBogie("Open", "Coal"),
+                new GoodsBogie("Box", "Grain")
         );
 
-        int expectedSum = 72 + 56 + 24 + 70;
-        int actualSum = bogies.stream()
-                .map(b -> b.capacity)
-                .reduce(0, Integer::sum);
+        assertTrue(isTrainFormationSafe(bogies));
+    }
 
-        assertEquals(expectedSum, actualSum);
+    @Test
+    void testMixedBogiesWithInvalidCylindricalCargo() {
+        List<GoodsBogie> bogies = Arrays.asList(
+                new GoodsBogie("Cylindrical", "Petroleum"),
+                new GoodsBogie("Cylindrical", "Coal"), // invalid
+                new GoodsBogie("Box", "Grain")
+        );
+
+        assertFalse(isTrainFormationSafe(bogies));
     }
 }
