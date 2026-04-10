@@ -1,9 +1,9 @@
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.stream.*;
 
 public class TrainConsistManagementApp {
 
-    // Reusing Bogie model from UC7
+    // Simple Bogie model
     static class Bogie {
         String name;
         int capacity;
@@ -15,28 +15,31 @@ public class TrainConsistManagementApp {
     }
 
     public static void main(String[] args) {
-        System.out.println("=======================================");
-        System.out.println(" UCB - Filter Passenger Bogies Using Streams ");
-        System.out.println("=======================================\n");
+        System.out.println("==================================");
+        System.out.println(" UC10 - Count Total Seats in Train ");
+        System.out.println("==================================");
 
-        // Create List of passenger bogies
+        // Create List of bogies
         List<Bogie> bogies = new ArrayList<>();
         bogies.add(new Bogie("Sleeper", 72));
         bogies.add(new Bogie("AC Chair", 56));
         bogies.add(new Bogie("First Class", 24));
-        bogies.add(new Bogie("General", 90));
+        bogies.add(new Bogie("Sleeper", 70));
 
-        System.out.println("All Bogies:");
-        bogies.forEach(b -> System.out.println(b.name + " -> " + b.capacity));
+        // Display bogies
+        System.out.println("\nBogies in Train:");
+        for (Bogie b : bogies) {
+            System.out.println(b.name + " -> " + b.capacity);
+        }
 
-        // Filter bogies with capacity > 60
-        List<Bogie> filteredBogies = bogies.stream()
-                .filter(b -> b.capacity > 60)
-                .collect(Collectors.toList());
+        // ---- AGGREGATE USING REDUCE ----
+        int totalCapacity = bogies.stream()
+                .map(b -> b.capacity)   // extract capacity
+                .reduce(0, Integer::sum); // sum capacities
 
-        System.out.println("\nFiltered Bogies (Capacity > 60):");
-        filteredBogies.forEach(b -> System.out.println(b.name + " -> " + b.capacity));
+        // Display result
+        System.out.println("\nTotal Seating Capacity of Train: " + totalCapacity);
 
-        System.out.println("\nUCB filtering completed...");
+        System.out.println("\nUC10 aggregation completed ...");
     }
 }
