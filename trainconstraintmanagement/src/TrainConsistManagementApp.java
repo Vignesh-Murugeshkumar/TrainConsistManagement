@@ -34,17 +34,18 @@ public class TrainConsistManagementApp {
         }
 
         // Group using Collectors.groupingBy
-        extracted(bogies);
+        Map<String, List<Bogie>> groupedBogies = groupBogiesByType(bogies);
+        printGroupedBogiesByType(groupedBogies);
 
         System.out.println("\nUC9 grouping completed ...");
     }
 
-    public static void extracted(List<Bogie> bogies) {
-        Map<String, List<Bogie>> groupedBogies =
-                bogies.stream()
-                        .collect(Collectors.groupingBy(b -> b.name));
+    public static Map<String, List<Bogie>> groupBogiesByType(List<Bogie> bogies) {
+        return bogies.stream()
+                .collect(Collectors.groupingBy(b -> b.name == null ? "Unknown" : b.name));
+    }
 
-        // Display grouped structure
+    public static void printGroupedBogiesByType(Map<String, List<Bogie>> groupedBogies) {
         System.out.println("\nGrouped Bogies:");
         for (Map.Entry<String, List<Bogie>> entry : groupedBogies.entrySet()) {
             System.out.println("\nBogie Type: " + entry.getKey());

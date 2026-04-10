@@ -1,6 +1,5 @@
 import org.junit.jupiter.api.Test;
 import java.util.*;
-import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TrainConsistManagementAppTest {
@@ -14,9 +13,9 @@ class TrainConsistManagementAppTest {
                 new TrainConsistManagementApp.Bogie("Sleeper", 70)
         );
 
-        // Act - Replicating the logic inside extracted() for testing
-        Map<String, List<TrainConsistManagementApp.Bogie>> grouped = bogies.stream()
-                .collect(Collectors.groupingBy(b -> b.name));
+        // Act
+        Map<String, List<TrainConsistManagementApp.Bogie>> grouped =
+                TrainConsistManagementApp.groupBogiesByType(bogies);
 
         // Assert
         assertEquals(2, grouped.size(), "Should have exactly 2 unique types (Sleeper, AC Chair)");
@@ -32,8 +31,8 @@ class TrainConsistManagementAppTest {
         );
 
         // Act
-        Map<String, List<TrainConsistManagementApp.Bogie>> grouped = bogies.stream()
-                .collect(Collectors.groupingBy(b -> b.name));
+        Map<String, List<TrainConsistManagementApp.Bogie>> grouped =
+                TrainConsistManagementApp.groupBogiesByType(bogies);
 
         // Assert
         TrainConsistManagementApp.Bogie b = grouped.get("First Class").get(0);
@@ -46,8 +45,8 @@ class TrainConsistManagementAppTest {
         List<TrainConsistManagementApp.Bogie> emptyList = new ArrayList<>();
 
         // Act
-        Map<String, List<TrainConsistManagementApp.Bogie>> result = emptyList.stream()
-                .collect(Collectors.groupingBy(b -> b.name));
+        Map<String, List<TrainConsistManagementApp.Bogie>> result =
+                TrainConsistManagementApp.groupBogiesByType(emptyList);
 
         // Assert
         assertTrue(result.isEmpty(), "Grouping an empty list should return an empty map");
@@ -60,8 +59,8 @@ class TrainConsistManagementAppTest {
                 new TrainConsistManagementApp.Bogie(null, 50)
         );
 
-        Map<String, List<TrainConsistManagementApp.Bogie>> result = nullNameList.stream()
-                .collect(Collectors.groupingBy(b -> b.name == null ? "Unknown" : b.name));
+        Map<String, List<TrainConsistManagementApp.Bogie>> result =
+                TrainConsistManagementApp.groupBogiesByType(nullNameList);
 
         assertTrue(result.containsKey("Unknown"));
     }
