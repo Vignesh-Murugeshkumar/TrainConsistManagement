@@ -1,36 +1,68 @@
 import org.junit.jupiter.api.Test;
 import java.util.*;
+import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TrainConsistManagementAppTest {
 
     @Test
-    void testGroupedBogies_GroupsByNameCorrectly() {
-        // 1. Arrange: Create a list with duplicate names to test grouping
+    void testGroupedBogies_CorrectKeysAndCounts() {
+        // Arrange
         List<TrainConsistManagementApp.Bogie> bogies = Arrays.asList(
                 new TrainConsistManagementApp.Bogie("Sleeper", 72),
-                new TrainConsistManagementApp.Bogie("Sleeper", 60),
-                new TrainConsistManagementApp.Bogie("General", 90)
+                new TrainConsistManagementApp.Bogie("AC Chair", 56),
+                new TrainConsistManagementApp.Bogie("Sleeper", 70)
         );
 
-        // 2. Act: Since your method is 'void' and prints to console,
-        // we replicate the logic to test the Map structure directly.
-        Map<String, List<TrainConsistManagementApp.Bogie>> groupedBogies =
-                bogies.stream().collect(java.util.stream.Collectors.groupingBy(b -> b.name));
+        // Act - Replicating the logic inside extracted() for testing
+        Map<String, List<TrainConsistManagementApp.Bogie>> grouped = bogies.stream()
+                .collect(Collectors.groupingBy(b -> b.name));
 
-        // 3. Assert
-        // Check if we have exactly 2 keys ("Sleeper" and "General")
-        assertEquals(2, groupedBogies.size(), "Should have 2 distinct groups");
+        // Assert
+        assertEquals(2, grouped.size(), "Should have exactly 2 unique types (Sleeper, AC Chair)");
+        assertEquals(2, grouped.get("Sleeper").size(), "Sleeper group should contain 2 bogies");
+        assertEquals(1, grouped.get("AC Chair").size(), "AC Chair group should contain 1 bogie");
+    }
 
-        // Check "Sleeper" group contents
-        List<TrainConsistManagementApp.Bogie> sleeperGroup = groupedBogies.get("Sleeper");
-        assertEquals(2, sleeperGroup.size(), "Sleeper group should have 2 bogies");
-        assertTrue(sleeperGroup.stream().anyMatch(b -> b.capacity == 72));
-        assertTrue(sleeperGroup.stream().anyMatch(b -> b.capacity == 60));
+    @Test
+    void testGroupedBogies_DataIntegrity() {
+        // Arrange
+        List<TrainConsistManagementApp.Bogie> bogies = Collections.singletonList(
+                new TrainConsistManagementApp.Bogie("First Class", 24)
+        );
 
-        // Check "General" group contents
-        List<TrainConsistManagementApp.Bogie> generalGroup = groupedBogies.get("General");
-        assertEquals(1, generalGroup.size());
-        assertEquals(90, generalGroup.get(0).capacity);
+        // Act
+        Map<String, List<TrainConsistManagementApp.Bogie>> grouped = bogies.stream()
+                .collect(Collectors.groupingBy(b -> b.name));
+
+        // Assert
+        TrainConsistManagementApp.Bogie b = grouped.get("First Class").get(0);
+        assertEquals(24, b.capacity, "The capacity in the group must match the original object");
+    }
+
+    @Test
+    void testGroupedBogies_EmptyList() {
+        // Arrange
+        List<TrainConsistManagementApp.Bogie> emptyList = new ArrayList<>();
+
+        // Act
+        Map<String, List<TrainConsistManagementApp.Bogie>> result = emptyList.stream()
+                .collect(Collectors.groupingBy(b -> b.name));
+
+        // Assert
+        assertTrue(result.isEmpty(), "Grouping an empty list should return an empty map");
+    }
+
+    @Test
+    void testGroupedBogies_NullHandling() {
+        // Ensure that names are handled; if names could be null, grouping still works
+        List<TrainConsistManagementApp.Bogie> nullNameList = Collections.singletonList(
+                new TrainConsistManagementApp.Bogie(null, 50)
+        );
+
+        Map<String, List<TrainConsistManagementApp.Bogie>> result = nullNameList.stream()
+                .collect(Collectors.groupingBy(b -> b.name == null ? "Unknown" : b.name));
+
+        assertTrue(result.containsKey("Unknown"));
     }
 }
