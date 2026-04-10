@@ -6,8 +6,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TrainConsistManagementAppTest {
+class TrainConsistManagementAppTest {
 
+    static class Bogie {
+        String name;
+        int capacity;
     @Test
     void testGroupedBogies_CorrectKeysAndCounts() {
         // Arrange
@@ -27,100 +30,121 @@ public class TrainConsistManagementAppTest {
         assertEquals(1, result.get("AC Chair").size());
     private List<TrainConsistManagementApp.Bogie> bogies;
 
-    @BeforeEach
-    void setUp() {
-        // Initialize the standard list used in UC7/UC8
-        bogies = new ArrayList<>();
-        bogies.add(new TrainConsistManagementApp.Bogie("Sleeper", 72));
-        bogies.add(new TrainConsistManagementApp.Bogie("AC Chair", 56));
-        bogies.add(new TrainConsistManagementApp.Bogie("First Class", 24));
-        bogies.add(new TrainConsistManagementApp.Bogie("General", 90));
+        Bogie(String name, int capacity) {
+            this.name = name;
+            this.capacity = capacity;
+        }
     }
 
     @Test
-    void testFilter_CapacityGreaterThanThreshold() {
-        // Tests: Bogies with capacity greater than 70 appear in the result
-        List<TrainConsistManagementApp.Bogie> result = bogies.stream()
-                .filter(b -> b.capacity > 70)
+    void testStreamAggregationBehavior() {
+        List<Bogie> bogies = Arrays.asList(
+                new Bogie("Sleeper", 72),
+                new Bogie("AC Chair", 56),
+                new Bogie("First Class", 24),
+                new Bogie("Sleeper", 70)
+        );
+
+        int totalCapacity = bogies.stream()
+                .map(b -> b.capacity)
+                .reduce(0, Integer::sum);
+
+        assertEquals(222, totalCapacity);
+    }
+
+    @Test
+    void testCapacityExtractionUsingMap() {
+        List<Bogie> bogies = Arrays.asList(new Bogie("Sleeper", 72));
+        List<Integer> capacities = bogies.stream()
+                .map(b -> b.capacity)
                 .collect(Collectors.toList());
 
-        assertEquals(2, result.size());
-        assertTrue(result.stream().anyMatch(b -> b.name.equals("Sleeper")));
-        assertTrue(result.stream().anyMatch(b -> b.name.equals("General")));
+        assertEquals(Collections.singletonList(72), capacities);
     }
 
     @Test
-    void testFilter_CapacityEqualToThreshold() {
-        // Tests: Bogies with capacity equal to 70 are excluded
-        bogies.add(new TrainConsistManagementApp.Bogie("Special", 70));
-        List<TrainConsistManagementApp.Bogie> result = bogies.stream()
-                .filter(b -> b.capacity > 70)
-                .collect(Collectors.toList());
+    void testTotalSeatCalculation() {
+        List<Bogie> bogies = Arrays.asList(
+                new Bogie("AC Chair", 56),
+                new Bogie("Sleeper", 70)
+        );
 
-        assertFalse(result.stream().anyMatch(b -> b.capacity == 70));
+        int total = bogies.stream()
+                .map(b -> b.capacity)
+                .reduce(0, Integer::sum);
+
+        assertEquals(126, total);
     }
 
     @Test
-    void testFilter_CapacityLessThanThreshold() {
-        // Tests: Bogies with capacity less than 70 do not appear in result
-        List<TrainConsistManagementApp.Bogie> result = bogies.stream()
-                .filter(b -> b.capacity > 70)
-                .collect(Collectors.toList());
+    void testMultipleBogieAggregation() {
+        List<Bogie> bogies = Arrays.asList(
+                new Bogie("Sleeper", 72),
+                new Bogie("Sleeper", 70),
+                new Bogie("AC Chair", 56)
+        );
 
-        assertTrue(result.stream().allMatch(b -> b.capacity > 70));
-        assertFalse(result.stream().anyMatch(b -> b.name.equals("AC Chair"))); // 56 < 70
+        int total = bogies.stream()
+                .map(b -> b.capacity)
+                .reduce(0, Integer::sum);
+
+        assertEquals(198, total);
     }
 
     @Test
-    void testFilter_MultipleBogiesMatching() {
-        // Tests: All matching bogies are returned (using threshold 50)
-        List<TrainConsistManagementApp.Bogie> result = bogies.stream()
-                .filter(b -> b.capacity > 50)
-                .collect(Collectors.toList());
+    void testSingleBogieHandling() {
+        List<Bogie> bogies = Arrays.asList(new Bogie("First Class", 24));
 
-        assertEquals(3, result.size()); // Sleeper, AC Chair, General
+        int total = bogies.stream()
+                .map(b -> b.capacity)
+                .reduce(0, Integer::sum);
+
+        assertEquals(24, total);
     }
 
     @Test
-    void testFilter_NoBogiesMatching() {
-        // Tests: The filtered list is empty when no bogies exceed 100
-        List<TrainConsistManagementApp.Bogie> result = bogies.stream()
-                .filter(b -> b.capacity > 100)
-                .collect(Collectors.toList());
+    void testEmptyCollectionHandling() {
+        List<Bogie> bogies = new ArrayList<>();
 
-        assertTrue(result.isEmpty());
+        int total = bogies.stream()
+                .map(b -> b.capacity)
+                .reduce(0, Integer::sum);
+
+        assertEquals(0, total);
     }
 
     @Test
-    void testFilter_AllBogiesMatching() {
-        // Tests: Filtered list contains all bogies if threshold is very low
-        List<TrainConsistManagementApp.Bogie> result = bogies.stream()
-                .filter(b -> b.capacity > 10)
-                .collect(Collectors.toList());
+    void testOriginalCollectionIntegrity() {
+        List<Bogie> bogies = Arrays.asList(
+                new Bogie("Sleeper", 72),
+                new Bogie("AC Chair", 56)
+        );
 
-        assertEquals(bogies.size(), result.size());
-    }
+        List<Bogie> copy = new ArrayList<>(bogies);
 
-    @Test
-    void testFilter_EmptyBogieList() {
-        // Tests: Filtering an empty list returns an empty list
-        List<TrainConsistManagementApp.Bogie> emptyList = new ArrayList<>();
-        List<TrainConsistManagementApp.Bogie> result = emptyList.stream()
-                .filter(b -> b.capacity > 60)
-                .collect(Collectors.toList());
-
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    void testFilter_OriginalListUnchanged() {
-        // Tests: Source list size and contents remain identical after processing
-        int originalSize = bogies.size();
         bogies.stream()
-                .filter(b -> b.capacity > 60)
-                .collect(Collectors.toList());
+                .map(b -> b.capacity)
+                .reduce(0, Integer::sum);
 
-        assertEquals(originalSize, bogies.size());
-        assertEquals("Sleeper", bogies.get(0).name);
+        assertEquals(copy.size(), bogies.size());
+        assertEquals(copy.get(0).name, bogies.get(0).name);
+        assertEquals(copy.get(1).capacity, bogies.get(1).capacity);
+    }
+
+    @Test
+    void testNumericAggregationValidation() {
+        List<Bogie> bogies = Arrays.asList(
+                new Bogie("Sleeper", 72),
+                new Bogie("AC Chair", 56),
+                new Bogie("First Class", 24),
+                new Bogie("Sleeper", 70)
+        );
+
+        int expectedSum = 72 + 56 + 24 + 70;
+        int actualSum = bogies.stream()
+                .map(b -> b.capacity)
+                .reduce(0, Integer::sum);
+
+        assertEquals(expectedSum, actualSum);
     }
 }
