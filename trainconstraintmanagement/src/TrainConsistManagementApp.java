@@ -1,18 +1,14 @@
 import java.util.*;
-import java.util.stream.*;
+import java.util.regex.*;
 
 public class TrainConsistManagementApp {
 
-    // Simple Bogie model
+    // Simple Bogie model (if needed for consistency with earlier UCs)
     static class Bogie {
         String name;
         int capacity;
-    // Declare as public so the test class can see it
-    public static class Bogie {
-        public String name;
-        public int capacity;
 
-        public Bogie(String name, int capacity) {
+        Bogie(String name, int capacity) {
             this.name = name;
             this.capacity = capacity;
         }
@@ -20,56 +16,30 @@ public class TrainConsistManagementApp {
 
     public static void main(String[] args) {
         System.out.println("==================================");
-        System.out.println(" UC10 - Count Total Seats in Train ");
+        System.out.println(" UC11 - Validate Train ID and Cargo Code ");
         System.out.println("==================================");
 
-        // Create List of bogies
-        System.out.println(" UC9 - Group Bogies by Type ");
-        System.out.println("==================================");
+        Scanner scanner = new Scanner(System.in);
 
-        List<Bogie> bogies = new ArrayList<>();
-        bogies.add(new Bogie("Sleeper", 72));
-        bogies.add(new Bogie("AC Chair", 56));
-        bogies.add(new Bogie("First Class", 24));
-        bogies.add(new Bogie("Sleeper", 70));
+        // Accept input
+        System.out.print("Enter Train ID (Format: TRN-1234): ");
+        String trainId = scanner.nextLine();
 
-        // Display bogies
-        System.out.println("\nBogies in Train:");
-        for (Bogie b : bogies) {
-            System.out.println(b.name + " -> " + b.capacity);
-        }
+        System.out.print("Enter Cargo Code (Format: PET-AB): ");
+        String cargoCode = scanner.nextLine();
 
-        // ---- AGGREGATE USING REDUCE ----
-        int totalCapacity = bogies.stream()
-                .map(b -> b.capacity)   // extract capacity
-                .reduce(0, Integer::sum); // sum capacities
+        // ---- DEFINE REGEX RULES ----
+        Pattern trainIdPattern = Pattern.compile("^TRN-\\d{4}$");
+        Pattern cargoCodePattern = Pattern.compile("^[A-Z]{3}-[A-Z]{2}$");
 
-        // Display result
-        System.out.println("\nTotal Seating Capacity of Train: " + totalCapacity);
+        boolean trainIdValid = trainIdPattern.matcher(trainId).matches();
+        boolean cargoCodeValid = cargoCodePattern.matcher(cargoCode).matches();
 
-        System.out.println("\nUC10 aggregation completed ...");
-        bogies.add(new Bogie("AC Chair", 60));
+        // Display validation results
+        System.out.println("\nValidation Results:");
+        System.out.println("Train ID Valid: " + trainIdValid);
+        System.out.println("Cargo Code Valid: " + cargoCodeValid);
 
-        // Group using the functional method
-        Map<String, List<Bogie>> grouped = getGroupedBogies(bogies);
-        displayGroupedBogies(grouped);
-
-        System.out.println("\nUC9 grouping completed ...");
-    }
-
-    // Returning the Map makes this logic testable
-    public static Map<String, List<Bogie>> getGroupedBogies(List<Bogie> bogies) {
-        return bogies.stream()
-                .collect(Collectors.groupingBy(b -> b.name));
-    }
-
-    public static void displayGroupedBogies(Map<String, List<Bogie>> groupedBogies) {
-        System.out.println("\nGrouped Bogies:");
-        for (Map.Entry<String, List<Bogie>> entry : groupedBogies.entrySet()) {
-            System.out.println("\nBogie Type: " + entry.getKey());
-            for (Bogie b : entry.getValue()) {
-                System.out.println("Capacity -> " + b.capacity);
-            }
-        }
+        System.out.println("\nUC11 validation completed ...");
     }
 }

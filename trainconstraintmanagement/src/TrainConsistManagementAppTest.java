@@ -1,150 +1,73 @@
 import org.junit.jupiter.api.Test;
-import java.util.*;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.regex.Pattern;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TrainConsistManagementAppTest {
 
-    static class Bogie {
-        String name;
-        int capacity;
+    // Regex patterns
+    private final Pattern trainIdPattern = Pattern.compile("^TRN-\\d{4}$");
+    private final Pattern cargoCodePattern = Pattern.compile("^[A-Z]{3}-[A-Z]{2}$");
+
     @Test
-    void testGroupedBogies_CorrectKeysAndCounts() {
-        // Arrange
-        List<TrainConsistManagementApp.Bogie> testBogies = Arrays.asList(
-                new TrainConsistManagementApp.Bogie("Sleeper", 72),
-                new TrainConsistManagementApp.Bogie("AC Chair", 56),
-                new TrainConsistManagementApp.Bogie("Sleeper", 70)
-        );
+    void testRegexValidationBehavior() {
+        String trainId = "TRN-1234";
+        String cargoCode = "PET-AB";
 
-        // Act - Use the public static method from the App class
-        Map<String, List<TrainConsistManagementApp.Bogie>> result =
-                TrainConsistManagementApp.getGroupedBogies(testBogies);
-
-        // Assert
-        assertEquals(2, result.size(), "Should have 2 unique groups");
-        assertEquals(2, result.get("Sleeper").size(), "Sleeper group count mismatch");
-        assertEquals(1, result.get("AC Chair").size());
-    private List<TrainConsistManagementApp.Bogie> bogies;
-
-        Bogie(String name, int capacity) {
-            this.name = name;
-            this.capacity = capacity;
-        }
+        assertTrue(trainIdPattern.matcher(trainId).matches());
+        assertTrue(cargoCodePattern.matcher(cargoCode).matches());
     }
 
     @Test
-    void testStreamAggregationBehavior() {
-        List<Bogie> bogies = Arrays.asList(
-                new Bogie("Sleeper", 72),
-                new Bogie("AC Chair", 56),
-                new Bogie("First Class", 24),
-                new Bogie("Sleeper", 70)
-        );
-
-        int totalCapacity = bogies.stream()
-                .map(b -> b.capacity)
-                .reduce(0, Integer::sum);
-
-        assertEquals(222, totalCapacity);
+    void testTrainIdFormatValidation() {
+        assertTrue(trainIdPattern.matcher("TRN-0001").matches());
+        assertFalse(trainIdPattern.matcher("TRN1234").matches());
+        assertFalse(trainIdPattern.matcher("TRN-12A4").matches());
+        assertFalse(trainIdPattern.matcher("TRN-12345").matches());
     }
 
     @Test
-    void testCapacityExtractionUsingMap() {
-        List<Bogie> bogies = Arrays.asList(new Bogie("Sleeper", 72));
-        List<Integer> capacities = bogies.stream()
-                .map(b -> b.capacity)
-                .collect(Collectors.toList());
-
-        assertEquals(Collections.singletonList(72), capacities);
+    void testCargoCodeFormatValidation() {
+        assertTrue(cargoCodePattern.matcher("PET-XY").matches());
+        assertFalse(cargoCodePattern.matcher("PET-xyz").matches());
+        assertFalse(cargoCodePattern.matcher("PET123").matches());
+        assertFalse(cargoCodePattern.matcher("PET-123").matches());
     }
 
     @Test
-    void testTotalSeatCalculation() {
-        List<Bogie> bogies = Arrays.asList(
-                new Bogie("AC Chair", 56),
-                new Bogie("Sleeper", 70)
-        );
-
-        int total = bogies.stream()
-                .map(b -> b.capacity)
-                .reduce(0, Integer::sum);
-
-        assertEquals(126, total);
+    void testValidInputHandling() {
+        assertTrue(trainIdPattern.matcher("TRN-6524").matches());
+        assertTrue(cargoCodePattern.matcher("PET-FH").matches());
     }
 
     @Test
-    void testMultipleBogieAggregation() {
-        List<Bogie> bogies = Arrays.asList(
-                new Bogie("Sleeper", 72),
-                new Bogie("Sleeper", 70),
-                new Bogie("AC Chair", 56)
-        );
-
-        int total = bogies.stream()
-                .map(b -> b.capacity)
-                .reduce(0, Integer::sum);
-
-        assertEquals(198, total);
+    void testInvalidInputDetection() {
+        assertFalse(trainIdPattern.matcher("TRN-65").matches());
+        assertFalse(cargoCodePattern.matcher("pet-ab").matches());
     }
 
     @Test
-    void testSingleBogieHandling() {
-        List<Bogie> bogies = Arrays.asList(new Bogie("First Class", 24));
-
-        int total = bogies.stream()
-                .map(b -> b.capacity)
-                .reduce(0, Integer::sum);
-
-        assertEquals(24, total);
+    void testExactPatternMatching() {
+        assertTrue(trainIdPattern.matcher("TRN-9999").matches());
+        assertFalse(trainIdPattern.matcher("TRN-9999 ").matches()); // trailing space
+        assertTrue(cargoCodePattern.matcher("PET-ZZ").matches());
+        assertFalse(cargoCodePattern.matcher(" PET-ZZ").matches()); // leading space
     }
 
     @Test
-    void testEmptyCollectionHandling() {
-        List<Bogie> bogies = new ArrayList<>();
-
-        int total = bogies.stream()
-                .map(b -> b.capacity)
-                .reduce(0, Integer::sum);
-
-        assertEquals(0, total);
+    void testCaseSensitivityValidation() {
+        assertTrue(cargoCodePattern.matcher("PET-AB").matches());
+        assertFalse(cargoCodePattern.matcher("pet-ab").matches());
     }
 
     @Test
-    void testOriginalCollectionIntegrity() {
-        List<Bogie> bogies = Arrays.asList(
-                new Bogie("Sleeper", 72),
-                new Bogie("AC Chair", 56)
-        );
+    void testOriginalInputIntegrity() {
+        String inputTrainId = "TRN-1234";
+        String inputCargoCode = "PET-AB";
 
-        List<Bogie> copy = new ArrayList<>(bogies);
+        trainIdPattern.matcher(inputTrainId).matches(); // validate
+        cargoCodePattern.matcher(inputCargoCode).matches(); // validate
 
-        bogies.stream()
-                .map(b -> b.capacity)
-                .reduce(0, Integer::sum);
-
-        assertEquals(copy.size(), bogies.size());
-        assertEquals(copy.get(0).name, bogies.get(0).name);
-        assertEquals(copy.get(1).capacity, bogies.get(1).capacity);
-    }
-
-    @Test
-    void testNumericAggregationValidation() {
-        List<Bogie> bogies = Arrays.asList(
-                new Bogie("Sleeper", 72),
-                new Bogie("AC Chair", 56),
-                new Bogie("First Class", 24),
-                new Bogie("Sleeper", 70)
-        );
-
-        int expectedSum = 72 + 56 + 24 + 70;
-        int actualSum = bogies.stream()
-                .map(b -> b.capacity)
-                .reduce(0, Integer::sum);
-
-        assertEquals(expectedSum, actualSum);
+        assertEquals("TRN-1234", inputTrainId);
+        assertEquals("PET-AB", inputCargoCode);
     }
 }
