@@ -1,63 +1,64 @@
-import java.util.*;
-import java.util.stream.Collectors;
-
-// Custom Exception for UC14
-class InvalidCapacityException extends Exception {
-    public InvalidCapacityException(String message) {
-        super(message);
-    }
-}
+import java.util.Scanner;
 
 public class TrainConsistManagementApp {
 
-    public static class Bogie {
-        public String name;
-        public int capacity;
-
-        // Constructor with Fail-Fast Validation (UC14)
-        public Bogie(String name, int capacity) throws InvalidCapacityException {
-            if (capacity <= 0) {
-                throw new InvalidCapacityException("Capacity must be greater than zero");
-            }
-            this.name = name;
-            this.capacity = capacity;
+    // ---- CUSTOM RUNTIME EXCEPTION ----
+    static class CargoSafetyException extends RuntimeException {
+        public CargoSafetyException(String message) {
+            super(message);
         }
     }
 
-    public static void main(String[] args) {
-        System.out.println("==========================================");
-        System.out.println(" UC13 & UC14 - Performance & Exceptions ");
-        System.out.println("==========================================\n");
+    // ---- GOODS BOGIE MODEL ----
+    static class GoodsBogie {
+        private String bogieShape;
+        private String cargoType;
 
-        List<Bogie> bogies = new ArrayList<>();
-
-        try {
-            // Adding valid bogies
-            bogies.add(new Bogie("Sleeper", 72));
-            bogies.add(new Bogie("AC Chair", 56));
-            bogies.add(new Bogie("First Class", 24));
-            bogies.add(new Bogie("General", 90));
-
-            // Performance Benchmark (UC13)
-            System.out.println("--- UC13: Performance Comparison ---");
-            long startStream = System.nanoTime();
-            List<Bogie> filtered = bogies.stream()
-                    .filter(b -> b.capacity > 60)
-                    .collect(Collectors.toList());
-            long endStream = System.nanoTime();
-
-            System.out.println("Stream Filter Duration: " + (endStream - startStream) + " ns");
-            System.out.println("Filtered Count: " + filtered.size());
-
-            // Custom Exception Trigger (UC14)
-            System.out.println("\n--- UC14: Exception Handling ---");
-            System.out.println("Attempting to add a bogie with -10 capacity...");
-            bogies.add(new Bogie("Invalid Bogie", -10));
-
-        } catch (InvalidCapacityException e) {
-            System.err.println("Caught Expected Error: " + e.getMessage());
+        public GoodsBogie(String bogieShape, String cargoType) {
+            // Safety validation: Petroleum cannot be loaded in Rectangular bogie
+            if (bogieShape.equalsIgnoreCase("Rectangular") &&
+                    cargoType.equalsIgnoreCase("Petroleum")) {
+                throw new CargoSafetyException(
+                        "Unsafe cargo assignment: Petroleum cannot be loaded in Rectangular bogie"
+                );
+            }
+            this.bogieShape = bogieShape;
+            this.cargoType = cargoType;
         }
 
-        System.out.println("\nExecution completed successfully.");
+        public String getCargoType() {
+            return cargoType;
+        }
+
+        public void displayDetails() {
+            System.out.println("Assigned Cargo: " + cargoType + " -> " + bogieShape);
+        }
+    }
+
+    // ---- MAIN METHOD ----
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("UC15 - Safe Cargo Assignment Using try-catch-finally");
+        System.out.println("----------------------------------------------------");
+
+        try {
+            System.out.print("Enter Bogie Shape (Rectangular / Cylindrical): ");
+            String shape = scanner.nextLine();
+
+            System.out.print("Enter Cargo Type (Coal / Cement / Petroleum): ");
+            String cargo = scanner.nextLine();
+
+            GoodsBogie bogie = new GoodsBogie(shape, cargo);
+            bogie.displayDetails();
+
+        } catch (CargoSafetyException e) {
+            System.out.println("Error: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Unexpected error: " + e.getMessage());
+        } finally {
+            System.out.println("\nUC15 cargo assignment handling completed ...");
+        }
+
+        scanner.close();
     }
 }
