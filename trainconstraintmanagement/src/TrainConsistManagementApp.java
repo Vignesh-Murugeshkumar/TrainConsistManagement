@@ -1,64 +1,35 @@
-import java.util.Scanner;
-
 public class TrainConsistManagementApp {
 
-    // ---- CUSTOM RUNTIME EXCEPTION ----
-    static class CargoSafetyException extends RuntimeException {
-        public CargoSafetyException(String message) {
-            super(message);
-        }
-    }
-
-    // ---- GOODS BOGIE MODEL ----
-    static class GoodsBogie {
-        private String bogieShape;
-        private String cargoType;
-
-        public GoodsBogie(String bogieShape, String cargoType) {
-            // Safety validation: Petroleum cannot be loaded in Rectangular bogie
-            if (bogieShape.equalsIgnoreCase("Rectangular") &&
-                    cargoType.equalsIgnoreCase("Petroleum")) {
-                throw new CargoSafetyException(
-                        "Unsafe cargo assignment: Petroleum cannot be loaded in Rectangular bogie"
-                );
-            }
-            this.bogieShape = bogieShape;
-            this.cargoType = cargoType;
-        }
-
-        public String getCargoType() {
-            return cargoType;
-        }
-
-        public void displayDetails() {
-            System.out.println("Assigned Cargo: " + cargoType + " -> " + bogieShape);
-        }
-    }
-
-    // ---- MAIN METHOD ----
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("UC15 - Safe Cargo Assignment Using try-catch-finally");
-        System.out.println("----------------------------------------------------");
 
-        try {
-            System.out.print("Enter Bogie Shape (Rectangular / Cylindrical): ");
-            String shape = scanner.nextLine();
+        System.out.println("UC16 - Manual Sorting using Bubble Sort\n");
 
-            System.out.print("Enter Cargo Type (Coal / Cement / Petroleum): ");
-            String cargo = scanner.nextLine();
+        // Create array of passenger bogie capacities
+        int[] capacities = {72, 56, 24, 70, 60};
 
-            GoodsBogie bogie = new GoodsBogie(shape, cargo);
-            bogie.displayDetails();
-
-        } catch (CargoSafetyException e) {
-            System.out.println("Error: " + e.getMessage());
-        } catch (Exception e) {
-            System.out.println("Unexpected error: " + e.getMessage());
-        } finally {
-            System.out.println("\nUC15 cargo assignment handling completed ...");
+        // Display original order
+        System.out.println("Original Capacities:");
+        for (int c : capacities) {
+            System.out.print(c + " ");
         }
 
-        scanner.close();
+        // ---- BUBBLE SORT LOGIC ----
+        for (int i = 0; i < capacities.length - 1; i++) {
+            for (int j = 0; j < capacities.length - i - 1; j++) {
+                if (capacities[j] > capacities[j + 1]) {
+                    int temp = capacities[j];
+                    capacities[j] = capacities[j + 1];
+                    capacities[j + 1] = temp;
+                }
+            }
+        }
+
+        // Display sorted result
+        System.out.println("\n\nSorted Capacities (Ascending):");
+        for (int c : capacities) {
+            System.out.print(c + " ");
+        }
+
+        System.out.println("\n\nUC16 sorting completed ...");
     }
 }
